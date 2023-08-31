@@ -1,4 +1,5 @@
-﻿using JWT;
+﻿using System.Diagnostics.CodeAnalysis;
+using JWT;
 using JWT.Algorithms;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,6 +8,7 @@ using SecurityHelper.Options;
 
 namespace SecurityHelper
 {
+    [ExcludeFromCodeCoverage]
     public static class ServiceCollectionExtensions
     {
         private const string OptionsSectionName = "Security";

@@ -12,21 +12,21 @@ namespace SecurityHelper.Jwt
 
     public class JwtEncoder : IJwtEncoder
     {
-        private readonly JwtOptions jwtOptions;
-        private readonly IJwtAlgorithm jwtAlgorithm;
+        private readonly JwtOptions _jwtOptions;
+        private readonly IJwtAlgorithm _jwtAlgorithm;
 
         public JwtEncoder(IOptions<JwtOptions> jwtOptions, IJwtAlgorithm jwtAlgorithm)
         {
-            this.jwtOptions = jwtOptions.Value;
-            this.jwtAlgorithm = jwtAlgorithm;
+            _jwtOptions = jwtOptions.Value;
+            _jwtAlgorithm = jwtAlgorithm;
         }
 
         public string Encode(string audience, int? timeoutInSeconds)
             => JwtBuilder.Create()
-                .WithAlgorithm(jwtAlgorithm)
-                .WithSecret(jwtOptions.Secret)
+                .WithAlgorithm(_jwtAlgorithm)
+                .WithSecret(_jwtOptions.Secret)
                 .IssuedAt(DateTime.UtcNow)
-                .ExpirationTime(DateTime.UtcNow.AddSeconds(timeoutInSeconds ?? jwtOptions.TimeoutInSeconds))
+                .ExpirationTime(DateTime.UtcNow.AddSeconds(timeoutInSeconds ?? _jwtOptions.TimeoutInSeconds))
                 .Audience(audience)
                 .Id(Guid.NewGuid())
                 .Encode();

@@ -45,16 +45,19 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 6.0.x
+    - name: Install dotnet-coverage      
+      run: dotnet tool install -g dotnet-coverage
     - name: Restore dependencies
-      run: dotnet restore      
+      run: dotnet restore
     - name: Build
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       shell: powershell
       run: |
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"jorge-aguero_testing-sonarcloud" /o:"jorge-aguero" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
+          .\.sonar\scanner\dotnet-sonarscanner begin /k:"jorge-aguero_testing-sonarcloud" /o:"jorge-aguero" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml
           dotnet build --no-restore
-          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"      
+          dotnet-coverage collect 'dotnet test' -f xml  -o 'coverage.xml'
+          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
     - name: Test
       run: dotnet test --no-build --verbosity normal
