@@ -11,7 +11,6 @@ namespace SecurityHelper
     [ExcludeFromCodeCoverage]
     public static class ServiceCollectionExtensions
     {
-        private const string OptionsSectionName = "Security";
         private const string ServiceNameKey = "ServiceName";
         public static IServiceCollection AddSecurityDependenciesForAzureFunction(this IServiceCollection services, IConfiguration configuration)
         {

@@ -1,47 +1,42 @@
 using AutoFixture;
+using AutoFixture.Xunit2;
+using FluentAssertions;
 using JWT.Algorithms;
 using Microsoft.Extensions.Options;
 using Moq;
 using SecurityHelper.Jwt;
 using SecurityHelper.Options;
+using SecurityHelper.Tests.Attributes;
 
 namespace SecurityHelper.Tests
 {
     public class JwtEncoderTests
     {
-        private readonly Mock<IOptions<JwtOptions>> _jwtOptionsMock;
-        private readonly IJwtAlgorithm _jwtAlgorithmMock;
-        private readonly JwtEncoder _jwtEncoder;
-        private readonly Fixture _fixture;
-
-        public JwtEncoderTests()
-        {
-            _fixture = new Fixture();
-
-            _jwtOptionsMock = new Mock<IOptions<JwtOptions>>();
-            var jwtConfiguration = _fixture.Create<JwtOptions>();
-            _jwtOptionsMock.SetupGet(x => x.Value).Returns(jwtConfiguration);
-
-#pragma warning disable CS0618 // Type or member is obsolete
-            _jwtAlgorithmMock = new HMACSHA256Algorithm();
-#pragma warning restore CS0618 // Type or member is obsolete
-
-            _jwtEncoder = new JwtEncoder(_jwtOptionsMock.Object, _jwtAlgorithmMock);
-        }
-
-        [Fact]
-        public void Encode_ShouldGiveValidToken()
+        [Theory, AutoMoqData<JwtAlgorithmCustomization>]
+        public void Should_GiveValidToken_When_Encoding(string audience, JwtOptions jwtConfiguration,
+            [Frozen] Mock<IOptions<JwtOptions>> jwtOptionsMock, JwtEncoder sut)
         {
             // Arrange
-            var audience = _fixture.Create<string>();
+            jwtOptionsMock.SetupGet(x => x.Value).Returns(jwtConfiguration);
 
             // Act
-            var token = _jwtEncoder.Encode(audience, null);
+            var token = sut.Encode(audience, null);
 
             // Assert
-            Assert.NotNull(token);
-            Assert.NotEmpty(token);
-            Assert.Equal(3, token.Split('.').Length);
+            token.Should()
+                .NotBeNull()
+                .And.NotBeEmpty();
+            token.Split('.').Should().HaveCount(3);
+        }
+
+        internal class JwtAlgorithmCustomization : ICustomization
+        {
+            public void Customize(IFixture fixture)
+            {
+#pragma warning disable CS0618 // Type or member is obsolete
+                fixture.Register<IJwtAlgorithm>(() => new HMACSHA256Algorithm());
+#pragma warning restore CS0618 // Type or member is obsolete
+            }
         }
     }
 }
